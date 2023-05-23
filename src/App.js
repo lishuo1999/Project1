@@ -39,6 +39,22 @@ function Article(props) {
     {props.body}
   </article>
 }
+function Create(props) {
+  return <article>
+    <h2>Create</h2>
+    <form onSubmit={event=>{
+      event.preventDefault();
+      const title = event.target.title.value;
+      const body = event.target.body.value;
+      props.onCreate(title, body); //onCreate 함수 호출, 입력받은 title, body 값을 받아 전송
+    }}>
+      <p><input type='text' name='title' placeholder="title"></input></p>
+      <p><input type='body' name='body' placeholder="body"></input></p>
+      <p><input type='submit' value='Create'></input></p>
+    </form>
+  </article>
+}
+
 function App() {
   //const _mode = useState('WELCOME'); //초기값
   //0: 상태값을 읽음 1: function 상태값을 변경할 때 사용
@@ -47,11 +63,12 @@ function App() {
   //const setMode = _mode[1]; //setMode를 통해 상태값 변경 가능
   const [mode, setMode] = useState('WELCOME');
   const [id, setId] = useState(null);
-  const topics = [
+  const [nextId, setnextId] = useState(4);
+  const [topics, setTopics] = useState([
     {id:1, title:'html', body:'html is...'},
     {id:2, title:'css', body:'css is...'},
     {id:3, title:'javascipt', body:'javascipt is...'}
-  ]
+  ]);
   let content = null;
   if (mode === 'WELCOME') {
     content = <Article title="Welcome" body="Hello, WEB"></Article>
@@ -66,6 +83,18 @@ function App() {
     }
     content = <Article title={title} body={body}></Article>
   }
+  else if (mode === 'CREATE') {
+    content = <Create onCreate={(title, body)=>{
+      const newTopic = {id: nextId, title:title, body:body}
+      const newTopics = [...topics] //복제본 생성
+      newTopics.push(newTopic);
+      setTopics(newTopics); //복제본을 원래 객체와 비교하여 불일치하면 렌더링, 일치하면 굳이 렌더링하지 않음
+      //추가 후 상세페이지로 이동
+      setMode('READ');
+      setId(nextId);
+      setnextId(nextId+1);
+    }}></Create>
+  }
 
   return (
     <div>
@@ -77,9 +106,12 @@ function App() {
         setId(id);
       }}></Nav>
       {content}
+      <a href='/create' onClick={event=>{
+        event.preventDefault();
+        setMode('CREATE');
+      }}>Create</a>
     </div>
   );
 }
 
 export default App;
- 
